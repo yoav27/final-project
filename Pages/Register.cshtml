@@ -1,0 +1,368 @@
+﻿@page
+@model final_project.Pages.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = null; /* מנתק את העמוד מה-Layout הדיפולטיבי */
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> <!-- הגדרת קידוד תווים -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- התאמה למכשירים ניידים -->
+    <title>Register</title> <!-- כותרת הכרטיסייה בדפדפן -->
+    <!-- טעינת ספריית האייקונים Font Awesome עבור העין בסיסמה ואייקוני המותג -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* איפוס הגדרות ברירת מחדל */
+        * {
+            box-sizing: border-box; /* הכללת פדינג בחישוב הרוחב */
+            margin: 0; /* ביטול מרווחים חיצוניים */
+            padding: 0; /* ביטול מרווחים פנימיים */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; /* פונט מודרני */
+        }
+
+        /* עיצוב גוף העמוד */
+        body {
+            background-color: #ffffff; /* רקע לבן */
+            min-height: 100vh; /* גובה מלא */
+            overflow-x: hidden; /* מניעת פס גלילה אופקי */
+        }
+
+        /* מעטפת ראשית שמחלקת את המסך לשניים */
+        .split-container {
+            display: flex; /* תצוגה גמישה בשתי עמודות */
+            width: 100vw; /* רוחב מלא */
+            min-height: 100vh; /* גובה מלא */
+        }
+
+        /* צד שמאל: המותג הצהוב (50%) */
+        .left-side {
+            width: 50%; /* חצי מסך */
+            flex: 0 0 50%; /* מניעת שינוי רוחב */
+            background: linear-gradient(135deg, #e3b02b 0%, #c48a00 100%); /* מפל צבעים צהוב-תיקייה */
+            color: #ffffff; /* טקסט לבן */
+            display: flex; /* יישור מרכזי */
+            flex-direction: column; /* סידור אנכי */
+            justify-content: center; /* יישור אנכי למרכז */
+            align-items: center; /* יישור אופקי למרכז */
+            padding: 60px; /* מרווח פנימי */
+            text-align: center; /* יישור טקסט למרכז */
+        }
+
+        /* מעטפת התוכן בצד שמאל */
+        .left-content {
+            max-width: 480px; /* הגבלת רוחב */
+        }
+
+        /* אייקון התיקייה הראשי */
+        .hero-icon {
+            font-size: 100px; /* גודל האייקון */
+            margin-bottom: 30px; /* מרווח תחתון */
+            color: #ffffff; /* צבע לבן */
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); /* צל רך */
+        }
+
+        /* כותרת ראשית בצד שמאל */
+        .hero-title {
+            font-size: 38px; /* גודל פונט */
+            font-weight: 700; /* מודגש */
+            line-height: 1.2; /* מרווח שורות */
+            margin-bottom: 20px; /* מרווח תחתון */
+        }
+
+        /* תיאור בצד שמאל */
+        .hero-description {
+            font-size: 18px; /* גודל פונט */
+            line-height: 1.6; /* מרווח שורות */
+            opacity: 0.95; /* שקיפות קלה */
+            margin-bottom: 40px; /* מרווח תחתון */
+        }
+
+        /* רשימת האייקונים בתחתית צד שמאל */
+        .features-list {
+            display: flex; /* סידור אופקי */
+            gap: 20px; /* רווח בין פריטים */
+            justify-content: center; /* יישור למרכז */
+            border-top: 1px solid rgba(255, 255, 255, 0.3); /* קו הפרדה עליון */
+            padding-top: 30px; /* מרווח עליון */
+        }
+
+        /* פריט ברשימת האייקונים */
+        .feature-item {
+            font-size: 14px; /* גודל פונט */
+            display: flex; /* סידור אופקי */
+            align-items: center; /* יישור למרכז */
+            gap: 8px; /* רווח פנימי */
+        }
+
+        /* צד ימין: טופס ההרשמה (50%) */
+        .right-side {
+            width: 50%; /* חצי מסך */
+            flex: 0 0 50%; /* מניעת שינוי רוחב */
+            display: flex; /* יישור מרכזי */
+            flex-direction: column; /* סידור אנכי */
+            justify-content: center; /* יישור אנכי למרכז */
+            align-items: center; /* יישור אופקי למרכז */
+            padding: 40px; /* מרווח פנימי */
+            background-color: #ffffff; /* רקע לבן */
+        }
+
+        /* קופסת הטופס המרכזית */
+        .login-box {
+            width: 100%; /* רוחב מלא במעטפת */
+            max-width: 380px; /* הגבלת רוחב לטופס */
+        }
+
+        /* כותרת Welcome צהובה */
+        .welcome-title {
+            font-size: 40px; /* גודל גופן */
+            font-weight: 700; /* מודגש */
+            color: #e3b02b; /* צהוב मמותג */
+            margin-bottom: 8px; /* מרווח תחתון */
+        }
+
+        /* כותרת משנה Sign Up */
+        .login-subtitle {
+            font-size: 22px; /* גודל פונט */
+            margin-bottom: 25px; /* מרווח תחתון לשדות */
+            color: #3d3b36; /* אפור כהה */
+        }
+
+        /* קבוצת שדה בטופס */
+        .form-group {
+            margin-bottom: 16px; /* מרווח מצומצם בין השדות כדי להכיל 4 שדות בקלות */
+            text-align: left; /* יישור לשמאל */
+        }
+
+            /* תגיות הלייבל מעל השדות */
+            .form-group label {
+                display: block; /* הצגה כבלוק */
+                font-size: 14px; /* גודל פונט */
+                font-weight: 600; /* חצי מודגש */
+                margin-bottom: 6px; /* מרווח תחתון לשדה */
+                color: #4a4744; /* צבע אפור אצילי */
+            }
+
+        /* מעטפת השדה והעין */
+        .input-wrapper {
+            position: relative; /* מיקום יחסי עבור כפתור העין */
+            display: flex; /* יישור אופקי */
+            align-items: center; /* יישור אנכי */
+        }
+
+        /* תיבות הקלט */
+        .form-control {
+            width: 100%; /* רוחב מלא */
+            padding: 11px 14px; /* מרווח פנימי להקלדה */
+            padding-right: 40px; /* מקום שמור לעין בצד ימין */
+            font-size: 14px; /* גודל הטקסט המוקלד */
+            border: 1px solid #e0dcd5; /* גבול עדין */
+            border-radius: 8px; /* פינות מעוגלות */
+            outline: none; /* ביטול מסגרת דיפולטיבית */
+            background-color: #ffffff; /* רקע לבן */
+            transition: border-color 0.2s, box-shadow 0.2s; /* מעבר חלק בפוקוס */
+        }
+
+            /* העצמת שדה בזמן הקלדה */
+            .form-control:focus {
+                border-color: #e3b02b; /* גבול צהוב */
+                box-shadow: 0 0 0 3px rgba(227, 176, 43, 0.2); /* הילה צהובה עדינה */
+            }
+
+        /* כפתור העין לסיסמה */
+        .toggle-password {
+            position: absolute; /* מיקום מוחלט בתיבה */
+            right: 12px; /* מיקום מימין */
+            background: none; /* ללא רקע */
+            border: none; /* ללא מסגרת */
+            cursor: pointer; /* סמן יד */
+            color: #d99b00; /* צבע צהוב לאייקון */
+            font-size: 16px; /* גודל האייקון */
+            display: flex; /* יישור מרכזי */
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* כפתור Submit ראשי להרשמה */
+        .btn-submit {
+            width: 100%; /* רוחב מלא */
+            background-color: #e3b02b; /* צהוב मמותג */
+            color: #ffffff; /* טקסט לבן */
+            border: none; /* ללא מסגרת */
+            border-radius: 8px; /* פינות מעוגלות */
+            padding: 13px; /* פדינג נוח */
+            font-size: 16px; /* גודל טקסט */
+            font-weight: 600; /* מודגש */
+            cursor: pointer; /* סמן יד */
+            margin-top: 10px; /* מרווח עליון מהשדות */
+            transition: background-color 0.2s, transform 0.1s; /* אפקט לחיצה */
+        }
+
+            /* אפקט רחף לכפתור */
+            .btn-submit:hover {
+                background-color: #c48a00; /* צהוב כהה יותר */
+            }
+
+            /* אפקט לחיצה לכפתור */
+            .btn-submit:active {
+                transform: scale(0.99); /* כיווץ מיקרוסקופי בלחיצה */
+            }
+
+        /* טקסט וקישור חזרה להתחברות */
+        .signup-text {
+            margin-top: 20px; /* מרווח עליון מהכפתור */
+            text-align: center; /* יישור למרכז */
+            font-size: 14px; /* גודל פונט */
+            color: #666059; /* צבע אפור */
+        }
+
+            /* קישור ה-Log in */
+            .signup-text a {
+                color: #d99b00; /* צבע צהוב */
+                text-decoration: none; /* ביטול קו תחתון */
+                font-weight: 600; /* חצי מודגש */
+            }
+
+                /* קו תחתון ברחף על הקישור */
+                .signup-text a:hover {
+                    text-decoration: underline;
+                }
+
+        /* הודעת שגיאה באדום במידה וההרשמה נכשלה */
+        .error-message {
+            color: #d93025; /* צבע אדום */
+            margin-bottom: 15px; /* מרווח תחתון */
+            font-size: 14px; /* גודל פונט */
+            font-weight: bold; /* מודגש */
+            text-align: center; /* יישור למרכז */
+        }
+
+        /* העלמת עין ברירת המחדל של הדפדפן */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        /* התאמה מלאה למסכי מובייל */
+        @@media (max-width: 850px) {
+            .split-container {
+                display: block !important;
+            }
+
+            .left-side, .right-side {
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: 0 0 100% !important;
+            }
+
+            .left-side {
+                padding: 40px 20px !important;
+            }
+
+            .right-side {
+                padding: 40px 20px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- מעטפת הראשית החוצה את המסך -->
+    <div class="split-container">
+
+        <!-- צד שמאל: מותג ויזואלי (50%) -->
+        <div class="left-side">
+            <div class="left-content">
+                <i class="fa-solid fa-folder-open hero-icon"></i> <!-- אייקון תיקייה -->
+                <h1 class="hero-title">Fast & Secure File Sharing</h1> <!-- כותרת מותג -->
+                <p class="hero-description">Manage, store, and share your files effortlessly anywhere, anytime.</p> <!-- תיאור -->
+                <div class="features-list">
+                    <!-- אייקונים נלווים -->
+                    <div class="feature-item"><i class="fa-solid fa-shield-halved"></i> Secure</div>
+                    <div class="feature-item"><i class="fa-solid fa-bolt"></i> Fast Upload</div>
+                    <div class="feature-item"><i class="fa-solid fa-cloud"></i> Cloud Storage</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- צד ימין: טופס ההרשמה (50%) -->
+        <div class="right-side">
+            <div class="login-box">
+                <h1 class="welcome-title">Create an Account</h1> <!-- כותרת -->
+                <h2 class="login-subtitle">Sign Up</h2> <!-- כותרת משנה להרשמה -->
+                <!-- הצגת הודעת שגיאה אם הוחזרה מ-C# -->
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="error-message">@Model.ErrorMessage</div>
+                }
+
+                <!-- טופס ההרשמה שנשלח אל C# -->
+                <form method="post">
+
+                    <!-- שדה 1: Full Name -->
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label> <!-- תגית שם מלא -->
+                        <input type="text" asp-for="FullName" id="fullName" class="form-control" placeholder="Enter your full name" required /> <!-- תיבת טקסט לשם מלא -->
+                    </div>
+
+                    <!-- שדה 2: Username -->
+                    <div class="form-group">
+                        <label for="username">Username</label> <!-- תגית שם משתמש -->
+                        <input type="text" asp-for="Username" id="username" class="form-control" placeholder="Choose a username" required /> <!-- תיבת טקסט לשם משתמש -->
+                    </div>
+
+                    <!-- שדה 3: Email -->
+                    <div class="form-group">
+                        <label for="email">Email</label> <!-- תגית אימייל -->
+                        <input type="email" asp-for="Email" id="email" class="form-control" placeholder="Enter your email" required /> <!-- תיבת טקסט לאימייל -->
+                    </div>
+
+                    <!-- שדה 4: Password -->
+                    <div class="form-group">
+                        <label for="password">Password</label> <!-- תגית סיסמה -->
+                        <div class="input-wrapper">
+                            <input type="password" asp-for="Password" id="password" class="form-control" placeholder="Create a password" required /> <!-- תיבת טקסט לסיסמה -->
+                            <button type="button" class="toggle-password" id="togglePasswordBtn">
+                                <!-- כפתור עין -->
+                                <i class="fa-regular fa-eye" id="toggleIcon"></i> <!-- אייקון העין -->
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- כפתור הרשמה ראשי -->
+                    <button type="submit" class="btn-submit">Sign Up</button> <!-- כפתור יצירת חשבון -->
+                    <!-- קישור מעבר חזרה לעמוד ההתחברות -->
+                    <p class="signup-text">
+                        Already have an account? <a asp-page="/Index">Log in</a> <!-- מעביר חזרה ל-Index.cshtml -->
+                    </p>
+
+                </form>
+
+            </div> <!-- סגירת login-box -->
+        </div> <!-- סגירת right-side -->
+
+    </div> <!-- סגירת split-container -->
+    <!-- סקריפט JavaScript להפעלת כפתור העין בשדה הסיסמה -->
+    <script>
+        const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        togglePasswordBtn.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            if (type === 'text') {
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+    </script>
+
+</body>
+</html>

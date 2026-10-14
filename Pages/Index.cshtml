@@ -1,0 +1,392 @@
+﻿@* הגדרת הנתיב כעמוד Razor Pages *@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = null; /* <-- השורה הזו מנתקת את העמוד מה-Layout הדיפולטיבי של הפרויקט */
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- הגדרת קידוד תווים תואם שפות מרובות -->
+    <meta charset="UTF-8">
+    
+    <!-- התאמת תצוגת העמוד למסכי ניידים ומחשבים -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>Login</title>
+
+    <!-- טעינת ספריית האייקונים Font Awesome עבור העין בסיסמה ואייקוני הרקע -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- עיצוב ה-CSS של העמוד -->
+    <style>
+        /* איפוס הגדרות ברירת מחדל של דפדפנים */
+        * { 
+            box-sizing: border-box; /* כולל פדינג וגבולות בחישוב הרוחב */
+            margin: 0; /* ביטול מרווחים חיצוניים */
+            padding: 0; /* ביטול מרווחים פנימיים */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; /* גופן מודרני ונקי */
+        }
+
+        /* עיצוב גוף העמוד */
+        body { 
+            background-color: #ffffff; /* רקע לבן נקי */
+            min-height: 100vh; /* גובה מינימלי למילוי כל המסך */
+            overflow-x: hidden; /* מניעת פס גלילה אופקי */
+        }
+
+        /* מעטפת ראשית שמחלקת את המסך לשניים */
+        .split-container { 
+            display: flex; /* שימוש ב-Flexbox ליישור אופקי של שני הצדדים */
+            width: 100vw; /* תפיסת כל רוחב המסך */
+            min-height: 100vh; /* גובה מלא של גליון הצפייה */
+        }
+
+        /* צד שמאל: האזור הוויזואלי (50% מרוחב המסך) */
+        .left-side { 
+            width: 50%; /* רוחב מדויק של חצי מסך */
+            flex: 0 0 50%; /* מניעת התכווצות או התרחבות מעבר ל-50% */
+            background: linear-gradient(135deg, #e3b02b 0%, #c48a00 100%); /* מפל צבעים בצהוב-תיקייה ממותג */
+            color: #ffffff; /* טקסט בצבע לבן */
+            display: flex; /* יישור תכנים במרכז */
+            flex-direction: column; /* סידור האלמנטים בטור */
+            justify-content: center; /* יישור אנכי למרכז */
+            align-items: center; /* יישור אופקי למרכז */
+            padding: 60px; /* מרווח פנימי להיקף התוכן */
+            text-align: center; /* יישור טקסט למרכז */
+        }
+
+        /* מעטפת התוכן של צד שמאל */
+        .left-content { 
+            max-width: 480px; /* רוחב מקסימלי לשמירה על פרופורציות */
+        }
+
+        /* עיצוב האייקון הראשי (תיקייה) */
+        .hero-icon { 
+            font-size: 100px; /* גודל האייקון */
+            margin-bottom: 30px; /* רווח תחתון */
+            color: #ffffff; /* צבע לבן */
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); /* צל רך מתחת לאייקון */
+        }
+
+        /* הכותרת הראשית בצד שמאל */
+        .hero-title { 
+            font-size: 38px; /* גודל פונט מרשים */
+            font-weight: 700; /* פונט מודגש */
+            line-height: 1.2; /* מרווח בין שורות */
+            margin-bottom: 20px; /* מרווח תחתון */
+        }
+
+        /* תיאור המערכת בצד שמאל */
+        .hero-description { 
+            font-size: 18px; /* גודל טקסט קריא */
+            line-height: 1.6; /* גובה שורה לאוורור התיאור */
+            opacity: 0.95; /* שקיפות קלה למראה מעודן */
+            margin-bottom: 40px; /* רווח תחתון */
+        }
+
+        /* רשימת המאפיינים בתחתית צד שמאל */
+        .features-list { 
+            display: flex; /* סידור אופקי של המאפיינים */
+            gap: 20px; /* רווח בין כל מאפיין */
+            justify-content: center; /* יישור למרכז */
+            border-top: 1px solid rgba(255, 255, 255, 0.3); /* קו הפרדה קל מעל */
+            padding-top: 30px; /* מרווח פנימי עליון */
+        }
+
+        /* כל פריט ברשימת המאפיינים */
+        .feature-item { 
+            font-size: 14px; /* גודל טקסט מוקטן */
+            display: flex; /* סידור האייקון והטקסט בשורה */
+            align-items: center; /* יישור אנכי למרכז */
+            gap: 8px; /* רווח בין האייקון לטקסט */
+        }
+
+        /* צד ימין: טופס ההתחברות (50% מרוחב המסך) */
+        .right-side { 
+            width: 50%; /* רוחב מדויק של חצי מסך */
+            flex: 0 0 50%; /* שמירה על רוחב קבוע של 50% */
+            display: flex; /* יישור תכנים בפורמט Flex */
+            flex-direction: column; /* סידור אנכי */
+            justify-content: center; /* יישור למרכז האנכי */
+            align-items: center; /* יישור למרכז האופקי */
+            padding: 40px; /* מרווח פנימי להיקף הטופס */
+            background-color: #ffffff; /* רקע לבן */
+        }
+
+        /* קופסת הטופס המרכזית */
+        .login-box { 
+            width: 100%; /* תפיסת מלוא הרוחב המוקצה */
+            max-width: 380px; /* הגבלת רוחב לטופס ממוקד */
+        }
+
+        /* כותרת Welcome גדולה בצהוב-תיקייה */
+        .welcome-title { 
+            font-size: 40px; /* גודל גופן בולט */
+            font-weight: 700; /* עובי גופן מודגש */
+            color: #e3b02b; /* הצבע הצהוב הממותג */
+            margin-bottom: 8px; /* מרווח קטן מתחת */
+        }
+
+        /* כותרת משנה Login */
+        .login-subtitle { 
+            font-size: 22px; /* גודל פונט בינוני */
+            margin-bottom: 30px; /* מרווח תחתון לשדות */
+            color: #3d3b36; /* צבע אפור כהה שבור */
+        }
+
+        /* קבוצת שדה בטופס */
+        .form-group { 
+            margin-bottom: 20px; /* מרווח בין השדות */
+            text-align: left; /* יישור הטקסט לשמאל */
+        }
+
+        /* תגיות ההסבר מעל השדות */
+        .form-group label { 
+            display: block; /* הצגה כבלוק מעל שדה הקלט */
+            font-size: 14px; /* גודל פונט תגית */
+            font-weight: 600; /* טקסט חצי-מודגש */
+            margin-bottom: 8px; /* מרווח קטן לשדה הקלט */
+            color: #4a4744; /* צבע אפור אצילי */
+        }
+
+        /* מעטפת השדה והאייקון */
+        .input-wrapper { 
+            position: relative; /* מיקום יחסי למיקום האייקון מעליו */
+            display: flex; /* יישור אופקי */
+            align-items: center; /* יישור אנכי למרכז */
+        }
+
+        /* תיבות הקלט (Input) */
+        .form-control { 
+            width: 100%; /* תפיסת כל רוחב המעטפת */
+            padding: 12px 14px; /* מרווח פנימי להקלדה נוחה */
+            padding-right: 40px; /* שמירת מקום לאייקון העין בצד ימין */
+            font-size: 15px; /* גודל הטקסט המוקלד */
+            border: 1px solid #e0dcd5; /* גבול עדין בסטנדרט */
+            border-radius: 8px; /* פינות מעוגלות מודרניות */
+            outline: none; /* ביטול המסגרת הדיפולטיבית של הדפדפן */
+            background-color: #ffffff; /* רקע לבן */
+            transition: border-color 0.2s, box-shadow 0.2s; /* מעבר חלק באפקט פוקוס */
+        }
+
+        /* שינוי עיצוב שדה בזמן פוקוס (הקלדה) */
+        .form-control:focus { 
+            border-color: #e3b02b; /* צביעת הגבול בצהוב-תיקייה */
+            box-shadow: 0 0 0 3px rgba(227, 176, 43, 0.2); /* הילה צהובה עדינה */
+        }
+
+        /* כפתור העין להצגת/הסתרת הסיסמה */
+        .toggle-password { 
+            position: absolute; /* מיקום מוחלט בתוך ה-input-wrapper */
+            right: 12px; /* מיקום בפינה הימנית של השדה */
+            background: none; /* ללא רקע */
+            border: none; /* ללא מסגרת */
+            cursor: pointer; /* סמן עכבר מסוג ידונית */
+            color: #d99b00; /* צבע צהוב-כהה לאייקון */
+            font-size: 16px; /* גודל האייקון */
+            display: flex; /* יישור מרכזי למנוע סטייה */
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* כפתור Submit ראשי להתחברות */
+        .btn-submit { 
+            width: 100%; /* תפיסת מלוא רוחב הטופס */
+            background-color: #e3b02b; /* רקע צהוב-תיקייה ממותג */
+            color: #ffffff; /* טקסט לבן */
+            border: none; /* ללא מסגרת */
+            border-radius: 8px; /* פינות מעוגלות */
+            padding: 14px; /* פדינג פנימי לכפתור נוח ללחיצה */
+            font-size: 16px; /* גודל הטקסט */
+            font-weight: 600; /* פונט מודגש */
+            cursor: pointer; /* סמן עכבר בלחיצה */
+            margin-top: 10px; /* מרווח עליון מתיבת הסיסמה */
+            transition: background-color 0.2s, transform 0.1s; /* אפקט לחיצה חלק */
+        }
+
+        /* שינוי צבע הכפתור ברחף (Hover) */
+        .btn-submit:hover { 
+            background-color: #c48a00; /* צהוב כהה יותר בלחיצה */
+        }
+
+        /* אפקט כיווץ קל בלחיצה (Active) */
+        .btn-submit:active { 
+            transform: scale(0.99); /* הקטנה מיקרוסקופית לתחושת לחיצה */
+        }
+
+        /* עיצוב הטקסט והקישור להרשמה */
+        .signup-text { 
+            margin-top: 25px; /* מרווח עליון מהכפתור */
+            text-align: center; /* יישור טקסט למרכז */
+            font-size: 14px; /* גודל טקסט */
+            color: #666059; /* צבע אפור ניטרלי */
+        }
+
+        /* קישור ה-Sign up */
+        .signup-text a { 
+            color: #d99b00; /* צבע קישור ממותג */
+            text-decoration: none; /* ביטול קו תחתון דיפולטיבי */
+            font-weight: 600; /* טקסט חצי-מודגש */
+        }
+
+        /* הוספת קו תחתון בעת רחף על הקישור */
+        .signup-text a:hover { 
+            text-decoration: underline; 
+        }
+
+        /* עיצוב הודעת שגיאה באדום במידה וההתחברות נכשלה ב-C# */
+        .error-message { 
+            color: #d93025; /* צבע אדום בולט לשגיאה */
+            margin-bottom: 15px; /* מרווח מתחת להודעה */
+            font-size: 14px; /* גודל גופן */
+            font-weight: bold; /* הבלטת הטקסט */
+            text-align: center; /* יישור למרכז */
+        }
+
+        /* העלמת עין ברירת המחדל של הדפדפן */
+        input[type="password"]::-ms-reveal, /* בוחר את כפתור חשיפת הסיסמה המובנה בדפדפני Edge/IE */
+        input[type="password"]::-ms-clear { /* בוחר את כפתור ניקוי הטקסט המובנה בדפדפן */
+            display: none; /* מורה לדפדפן להסתיר את הכפתורים המובנים הללו */
+
+        @@media (max-width: 850px) { /* מפעיל את הכללים שבתוך הבלוק רק במסכים שרוחבם עד 850 פיקסלים */
+
+            .split-container
+
+        { /* בוחר את הקונטיינר הראשי של העמוד */
+            display: block !important; /* מעביר מ-Flex למבנה בלוק רגיל שמכריח ירידת שורה */
+        }
+        /* סוגר את הגדרות העיצוב של הקונטיינר הראשי */
+
+        .left-side, .right-side { /* בוחר יחד את החלק השמאלי הצהוב ואת החלק הימני של הטופס */
+            width: 100% !important; /* קובע שכל אחד מהחלקים יתפוס 100% מרוחב המסך */
+            max-width: 100% !important; /* מונע הגבלת רוחב מקסימלי */
+            flex: 0 0 100% !important; /* דורס ומבטל את ה-flex: 0 0 50% שהוגדר ב-CSS הרגיל למעלה */
+        }
+        /* סוגר את הגדרות העיצוב המשותפות לשני החלקים */
+
+        .left-side { /* בוחר את החלק השמאלי (הצהוב) */
+            padding: 40px 20px !important; /* מגדיר רווח פנימי מעודכן למובייל */
+        }
+        /* סוגר את הגדרות העיצוב של החלק השמאלי */
+
+        .right-side { /* בוחר את החלק הימני (הטופס) */
+            padding: 40px 20px !important; /* מגדיר רווח פנימי מעודכן למובייל */
+        }
+        /* סוגר את הגדרות העיצוב של החלק הימני */
+
+        }
+    </style>
+</head>
+<body>
+
+    <!-- מעטפת הראשית החוצה את המסך -->
+    <div class="split-container">
+        
+        <!-- צד שמאל: עיצוב מיתוגי (50%) -->
+        <div class="left-side">
+            <div class="left-content">
+                <!-- אייקון תיקייה מגדלור -->
+                <i class="fa-solid fa-folder-open hero-icon"></i>
+                <!-- כותרת ראשית שיווקית -->
+                <h1 class="hero-title">Fast & Secure File Sharing</h1>
+                <!-- תיאור האפליקציה -->
+                <p class="hero-description">Manage, store, and share your files effortlessly anywhere, anytime.</p>
+                <!-- אייקונים נלווים -->
+                <div class="features-list">
+                    <div class="feature-item"><i class="fa-solid fa-shield-halved"></i> Secure</div>
+                    <div class="feature-item"><i class="fa-solid fa-bolt"></i> Fast Upload</div>
+                    <div class="feature-item"><i class="fa-solid fa-cloud"></i> Cloud Storage</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- צד ימין: טופס ההתחברות המקושר ל-C# (50%) -->
+        <div class="right-side">
+            <div class="login-box">
+                <h1 class="welcome-title">Welcome</h1>
+                <h2 class="login-subtitle">Login</h2>
+
+                <!-- בדיקה ב-Razor: אם הוחזרה הודעת שגיאה מ-C#, נציג אותה במסך -->
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="error-message">@Model.ErrorMessage</div>
+                }
+
+
+            <!-- טופס השליחה בשיטת POST בחזרה אל קוד ה-C# -->
+                <form method="post">
+                    <!-- פתיחת תגית הטופס -->
+                    <!-- קבוצת עיצוב עבור שדה האימייל -->
+                    <div class="form-group">
+                        <!-- מעטפת שדה האימייל -->
+                        <label for="email">Email</label> <!-- כותרת השדה -->
+                        <input type="email" asp-for="Email" id="email" class="form-control" placeholder="Enter your email" required /> <!-- תיבת הטקסט להקלדת האימייל -->
+                    </div> <!-- סגירת מעטפת שדה האימייל -->
+                    <!-- קבוצת עיצוב עבור שדה הסיסמה -->
+                    <div class="form-group">
+                        <!-- מעטפת שדה הסיסמה -->
+
+                        <label for="password">Password</label> <!-- כותרת שדה הסיסמה -->
+                        <!-- מעטפת לשדה הקלט ולכפתור העין הצהובה -->
+                        <div class="input-wrapper">
+                            <!-- מעטפת המאפשרת מיקום העין בתוך התיבה -->
+                            <input type="password" asp-for="Password" id="password" class="form-control" placeholder="Enter your password" required /> <!-- תיבת הטקסט להקלדת הסיסמה -->
+                            <button type="button" class="toggle-password" id="togglePasswordBtn">
+                                <!-- כפתור הלחיצה להצגת/הסתרת הסיסמה -->
+                                <i class="fa-regular fa-eye" id="toggleIcon"></i> <!-- האייקון של העין הצהובה -->
+                            </button> <!-- סגירת כפתור העין -->
+                        </div> <!-- סגירת מעטפת התיבה והעין -->
+                        <!-- שורה תחתונה עבור הקישור לאיפוס סיסמה מתחת לתיבה -->
+                        <div style="text-align: right; margin-top: 6px;">
+                            <!-- יישור הקישור לימין ורווח קטן מהתיבה -->
+                            <a asp-page="/Forget-Password" style="font-size: 13px; color: #d99b00; text-decoration: none; font-weight: 600;">Forgot password?</a>
+                        </div> <!-- סגירת המעטפת של הקישור -->
+
+                    </div> <!-- סגירת מעטפת שדה הסיסמה -->
+                    <!-- כפתור השליחה הראשי -->
+                    <button type="submit" class="btn-submit">Log In</button> <!-- כפתור התחברות לטופס -->
+                    <p class="signup-text">
+                        You don't have user? <a asp-page="/Register">Sign up</a> <!-- מעביר לעמוד Register החדש -->
+                    </p>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- סקריפט JavaScript להחלפת מצב הסיסמה (הסתרה/גלוי) -->
+    <script>
+        // תפיסת אלמנט שדה הסיסמה לפי ה-ID
+        const passwordInput = document.getElementById('password');
+        // תפיסת כפתור העין
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        // תפיסת אייקון העין בתוך הכפתור
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        // האזנה לאירוע לחיצה (Click) על כפתור העין
+        togglePasswordBtn.addEventListener('click', function () {
+            // בדיקה האם השדה במצב סיסמה (מוסתר) או טקסט (גלוי)
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            
+            // עדכון ה-type של השדה בהתאם
+            passwordInput.setAttribute('type', type);
+            
+            // החלפת סגנון האייקון מ-עין פתוחה לעין חצויה ולהפך
+            if (type === 'text') 
+            {
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            }
+            else 
+            {
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+    </script>
+
+</body>
+</html>

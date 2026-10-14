@@ -1,0 +1,447 @@
+@page
+
+@* חיבור הדף למחלקת ה-Model ב-C# (AdminModel) שדרכה מתקבלים הנתונים מ-PostgreSQL *@
+@model final_project.Pages.AdminModel
+
+@{
+    // ביטול שימוש ב-Layout הדיפולטי של הפרויקט כדי לאפשר עיצוב עצמאי מלא
+    Layout = null;
+    
+    // הגדרת כותרת הדף שתוצג בלשונית הדפדפן
+    ViewData["Title"] = "לוח בקרה - ניהול";
+}
+
+<!DOCTYPE html>
+@* הגדרת השפה כעברית (he) והגדרת כיווניות הטקסט מימין לשמאל (RTL) *@
+<html lang="he" dir="rtl">
+<head>
+    @* קידוד תווים תואם עברית (UTF-8) *@
+    <meta charset="utf-8" />
+    
+    @* התאמת הדף למסכי ניידים ומחשבים (Responsive Design) *@
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    @* הצגת כותרת הדף מתוך משתנה ה-ViewData *@
+    <title>@ViewData["Title"]</title>
+    
+    @* טעינת הפונט Rubik מ-Google Fonts מותאם לעברית *@
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    @* טעינת ספריית האייקונים FontAwesome לשימוש באייקונים מעוצבים *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        /* איפוס גבולות, רווחים וקביעת פונט רוביק לכל האלמנטים בדף */
+        * {
+            box-sizing: border-box; /* הכללת פאדינג וגבולות בחישוב הרוחב של כל אלמנט */
+            font-family: 'Rubik', sans-serif; /* פונט אחיד לכל הרכיבים */
+            margin: 0; /* איפוס מרחקים חיצוניים */
+            padding: 0; /* איפוס מרחקים פנימיים */
+        }
+
+        /* עיצוב גוף הדף הראשי */
+        body {
+            background-color: #f4f5f8; /* צבע רקע אפור-בהיר ורגוע */
+            display: flex; /* סידור אופקי: תפריט צד + תוכן מרכזי */
+            height: 100vh; /* תפיסת כל גובה המסך (100% מתוך גובה החלון) */
+            overflow: hidden; /* מניעת פס גלילה חיצוני כפול */
+        }
+
+        /* ================= עיצוב סרגל צדדי (Sidebar) ================= */
+        .sidebar {
+            width: 250px; /* רוחב קבוע לסרגל הצד */
+            background-color: #1a1a1a; /* רקע שחור-פחם יוקרתי */
+            color: #ffffff; /* צבע טקסט לבן */
+            display: flex; /* סדר אנכי לרכיבי הסרגל */
+            flex-direction: column; /* כיוון מלמעלה למטה */
+            justify-content: space-between; /* פיזור הרווח: תפריט למעלה, פוטר למטה */
+            padding: 20px 0; /* רווח פנימי מעל ומתחת */
+            border-left: 2px solid #ffcc00; /* קו הפרדה צהוב בצד שמאל של התפריט */
+        }
+
+        /* עיצוב לוגו/כותרת המערכת בראש התפריט */
+        .sidebar-brand {
+            font-size: 24px; /* גודל גופן בולט */
+            font-weight: bold; /* כתב מודגש */
+            color: #ffcc00; /* צבע צהוב-זהב יוקרתי */
+            padding: 0 20px 25px; /* מרווח פנימי */
+            display: flex; /* תצוגת פלקס ליישור האייקון והטקסט */
+            align-items: center; /* יישור אנכי למרכז */
+            gap: 12px; /* רווח בין האייקון לטקסט */
+            border-bottom: 1px solid rgba(255, 204, 0, 0.2); /* קו הפרדה עדין בצהוב שקוף */
+        }
+
+        /* עיצוב רשימת כפתורי התפריט */
+        .sidebar-menu {
+            list-style: none; /* ביטול הנקודות הדיפולטיות של רשימה */
+            margin-top: 20px; /* מרווח מעל הרשימה */
+        }
+
+        /* עיצוב כל קישור בודד בתפריט הצד */
+        .sidebar-menu li a {
+            display: flex; /* יישור אופקי לאייקון ולטקסט */
+            align-items: center; /* יישור למרכז */
+            gap: 15px; /* רווח בין האייקון לטקסט */
+            padding: 14px 20px; /* מרווח פנימי ללחיצה נוחה */
+            color: #b0b0b0; /* צבע טקסט אפור בלתי פעיל */
+            text-decoration: none; /* ביטול קו תחתון של קישור */
+            font-size: 15px; /* גודל טקסט תפריט */
+            transition: all 0.25s ease; /* מעבר חלק בשינוי צבעים */
+        }
+
+        /* עיצוב כפתור פעיל (Active) או בעת מעבר עכבר (Hover) */
+        .sidebar-menu li.active a, .sidebar-menu li a:hover {
+            background-color: rgba(255, 204, 0, 0.12); /* רקע צהוב שקוף ועדין */
+            color: #ffcc00; /* שינוי הטקסט והאייקון לצהוב */
+            border-right: 4px solid #ffcc00; /* פס צהוב בולט בימין הקישור */
+        }
+
+        /* עיצוב תיקיית מידע בחלק התחתון של התפריט */
+        .sidebar-footer {
+            padding: 15px; /* מרווח פנימי */
+            font-size: 13px; /* גודל טקסט קטן */
+            background-color: #242424; /* רקע שחור-אפור מעט בהיר יותר */
+            margin: 0 15px; /* רווח מהקצוות */
+            border-radius: 8px; /* פינות מעוגלות */
+            text-align: center; /* יישור הטקסט למרכז */
+            color: #d1d1d1; /* צבע טקסט אפור בהיר */
+            border: 1px solid rgba(255, 204, 0, 0.15); /* מסגרת צהובה עדינה */
+        }
+
+        /* ================= עיצוב התוכן המרכזי (Main Content) ================= */
+        .main-wrapper {
+            flex: 1; /* תפיסת כל שאר המקום הפנוי במסך */
+            display: flex; /* תצוגת פלקס */
+            flex-direction: column; /* סדר אנכי */
+            overflow-y: auto; /* מאפשר גלילה אנכית במידת הצורך */
+        }
+
+        /* עיצוב הסרגל העליון (Header) */
+        .top-header {
+            background-color: #ffffff; /* רקע לבן נקי */
+            padding: 15px 30px; /* מרווח פנימי */
+            display: flex; /* פריסת פלקס */
+            justify-content: space-between; /* פיזור אלמנטים לקצוות (ימין ושמאל) */
+            align-items: center; /* יישור אנכי למרכז */
+            border-bottom: 2px solid #ffcc00; /* פס צהוב ממתג מתחת להדר */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); /* הצללה קלה מאוד */
+        }
+
+        /* עיצוב אזור הפרופיל בסרגל העליון */
+        .user-profile {
+            display: flex; /* פריסה אופקית */
+            align-items: center; /* יישור למרכז */
+            gap: 12px; /* רווח בין אייקון לשם המשתמש */
+            font-weight: 500; /* עובי גופן בינוני */
+            color: #1a1a1a; /* צבע טקסט כהה */
+        }
+
+        /* צבע האייקון של המשתמש בסרגל העליון */
+        .user-profile i {
+            color: #ffcc00; /* צבע צהוב-זהב */
+        }
+
+        /* מעטפת התוכן של הדשבורד */
+        .dashboard-content {
+            padding: 30px; /* רווח פנימי גדול מסביב ללוח הבקרה */
+            display: flex; /* תצוגה אנכית */
+            flex-direction: column;
+            gap: 25px; /* מרווח קבוע בין השורות והפאנלים */
+        }
+
+        /* ================= עיצוב כרטיסיות מדדים (KPI Cards) ================= */
+        .cards-grid {
+            display: grid; /* פריסת רשת (Grid) */
+            grid-template-columns: repeat(2, 1fr); /* 2 כרטיסיות שוות לאורך כל הרוחב */
+            gap: 20px; /* מרווח בין הכרטיסיות */
+        }
+
+        /* עיצוב כרטיסיית מדד בודדת */
+        .card {
+            background-color: #ffffff; /* רקע לבן */
+            padding: 22px; /* מרווח פנימי */
+            border-radius: 12px; /* פינות מעוגלות */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04); /* הצללה רכה */
+            border-top: 4px solid #ffcc00; /* פס צהוב בולט בראש הכרטיסייה */
+            display: flex; /* סדר אנכי */
+            flex-direction: column;
+            gap: 10px; /* רווח בין כותרת למספר */
+            transition: transform 0.2s ease; /* אפקט תנועה חלק ב-Hover */
+        }
+
+        /* אפקט הטיפוס הקל במעבר עכבר על כרטיסייה */
+        .card:hover {
+            transform: translateY(-3px); /* הילקחות 3 פיקסלים למעלה */
+        }
+
+        /* כותרת הכרטיסייה */
+        .card-title {
+            font-size: 14px; /* גודל טקסט כותרת */
+            color: #666666; /* אפור בינוני */
+            font-weight: 500;
+        }
+
+        /* ערך הנתון הבולט בכרטיסייה */
+        .card-value {
+            font-size: 30px; /* גודל פונט ענק ומודגש */
+            font-weight: 700;
+            color: #1a1a1a; /* צבע כהה */
+        }
+
+        /* טקסט נלווה קטן ליד המספר */
+        .card-value span {
+            font-size: 15px; /* גודל טקסט מוקטן */
+            color: #888888; /* צבע אפור */
+            font-weight: 400;
+        }
+
+        /* ================= פאנל לבן מעוצב עטיפה לטבלה ================= */
+        .panel {
+            background-color: #ffffff; /* רקע לבן */
+            padding: 22px; /* מרווח פנימי */
+            border-radius: 12px; /* פינות מעוגלות */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04); /* הצללה */
+            border: 1px solid #eef0f4; /* מסגרת דקה מאוד */
+            width: 100%; /* תפיסת 100% מרוחב המסך הזמין */
+        }
+
+        /* כותרת הפאנל */
+        .panel-header {
+            display: flex; /* פריסה אופקית */
+            justify-content: space-between; /* פיזור לקצוות */
+            align-items: center; /* יישור אנכי למרכז */
+            margin-bottom: 20px; /* רווח מתוכן הפאנל */
+            padding-bottom: 12px; /* רווח מעל קו ההפרדה */
+            border-bottom: 2px solid #f4f5f8; /* קו הפרדה תחתי עדין */
+        }
+
+        /* טקסט כותרת הפאנל */
+        .panel-title {
+            font-size: 18px; /* גודל פונט */
+            font-weight: 700; /* מודגש */
+            color: #1a1a1a; /* צבע כהה */
+            display: flex; /* יישור אייקון וטקסט */
+            align-items: center;
+            gap: 10px; /* רווח בין אייקון לכותרת */
+        }
+
+        /* אייקון בכותרת הפאנל */
+        .panel-title i {
+            color: #e6b800; /* צבע צהוב-זהב */
+        }
+
+        /* ================= עיצוב הטבלה בשילוב צהוב-שחור ================= */
+        table {
+            width: 100%; /* תפיסת כל רוחב הפאנל */
+            border-collapse: collapse; /* איחוד שוליים בין תאים */
+            text-align: right; /* יישור טקסט לימין (RTL) */
+        }
+
+        /* כותרי העמודות של הטבלה */
+        th {
+            background-color: #1a1a1a; /* רקע שחור-פחם כהה */
+            color: #ffcc00; /* טקסט הכותרות בצהוב בולט */
+            padding: 14px 18px; /* מרווח פנימי בתא */
+            font-size: 14px; /* גודל טקסט */
+            font-weight: 600; /* מודגש בינוני */
+        }
+
+        /* עיגול פינה ימנית עליונה של כותרת הטבלה */
+        th:first-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        /* עיגול פינה שמאלית עליונה של כותרת הטבלה */
+        th:last-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        /* תאי נתונים בטבלה */
+        td {
+            padding: 16px 18px; /* מרווח פנימי בתא */
+            font-size: 14px; /* גודל גופן */
+            color: #333333; /* צבע טקסט */
+            border-bottom: 1px solid #f0f0f0; /* קו הפרדה עדין בין השורות */
+        }
+
+        /* היילייט צהבהב במעבר עכבר על שורה בטבלה */
+        tr:hover td {
+            background-color: #fffdf0; /* רקע צהוב-בהיר ועדין במעבר עכבר */
+        }
+
+        /* תגית סטטוס "פעיל" במראה מותאם בצהוב/זהב */
+        .badge-active {
+            background-color: #fff8d6; /* רקע צהבהב בהיר */
+            color: #997a00; /* טקסט מוזהב כהה */
+            border: 1px solid #ffe680; /* גבול צהוב עדין */
+            padding: 4px 12px; /* רווח פנימי לתגית */
+            border-radius: 20px; /* עיגול תגית מלא */
+            font-size: 12px; /* גודל טקסט קטן */
+            font-weight: 700; /* כתב מודגש */
+        }
+
+        /* עיצוב כפתור מחיקה יוקרתי באדום עדין עם אפקט Hover */
+        .btn-delete {
+            background-color: #fff2f2; /* רקע אדום בהיר מאוד */
+            color: #dc3545; /* צבע טקסט אדום */
+            border: 1px solid #ffcdd2; /* מסגרת אדומה עדינה */
+            padding: 6px 14px; /* רווח פנימי לנוחות לחיצה */
+            border-radius: 6px; /* פינות מעוגלות */
+            font-size: 13px; /* גודל טקסט */
+            font-weight: 500; /* עובי גופן */
+            cursor: pointer; /* סמן עכבר בלחיצה */
+            transition: all 0.2s ease; /* אפקט מעבר חלק בשינוי צבע */
+            display: inline-flex; /* סידור אופקי לאייקון ולטקסט */
+            align-items: center; /* יישור אנכי למרכז */
+            gap: 6px; /* רווח בין אייקון הפח לטקסט */
+        }
+
+        /* שינוי עיצוב כפתור מחיקה בעת מעבר עכבר (Hover) */
+        .btn-delete:hover {
+            background-color: #dc3545; /* רקע אדום בולט */
+            color: #ffffff; /* טקסט לבן */
+            border-color: #dc3545; /* מסגרת אדומה */
+        }
+
+        /* סדר ויישור אופקי בתאי הסטטוס והפעולות */
+        .action-cell {
+            display: flex; /* סידור פלקס אופקי */
+            align-items: center; /* יישור אנכי למרכז */
+            gap: 12px; /* רווח בין תגית "פעיל" לכפתור המחיקה */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== סרגל צדדי (Sidebar) ==================== -->
+    <div class="sidebar">
+        <div>
+            <!-- לוגו / מיתוג ראש התפריט -->
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-shield-halved"></i> מערכת ניהול
+            </div>
+
+            <!-- תפריט הניווט הראשי - מותאם נקי בלבד -->
+            <ul class="sidebar-menu">
+                @* פריט תפריט פעיל: תמונת מצב *@
+                <li class="active"><a href="#"><i class="fa-solid fa-chart-pie"></i> תמונת מצב</a></li>
+                @* פריט תפריט משני: הגדרות מערכת *@
+                <li><a href="#"><i class="fa-solid fa-sliders"></i> הגדרות מערכת</a></li>
+            </ul>
+        </div>
+
+        <!-- פוטר תחתון בתפריט הצד -->
+        <div class="sidebar-footer">
+            <i class="fa-solid fa-circle-check" style="color: #ffcc00;"></i> מחובר ל-PostgreSQL
+        </div>
+    </div>
+
+    <!-- ==================== תוכן מרכזי (Main Wrapper) ==================== -->
+    <div class="main-wrapper">
+        
+        <!-- סרגל עליון (Top Header) -->
+        <div class="top-header">
+            <!-- פרטי משתמש מחובר -->
+            <div class="user-profile">
+                <i class="fa-solid fa-circle-user fa-2xl"></i>
+                <span>שלום, מנהל מערכת</span>
+            </div>
+            <!-- כפתור התראות פעמון -->
+            <div>
+                <i class="fa-regular fa-bell fa-lg" style="color: #1a1a1a; cursor: pointer;"></i>
+            </div>
+        </div>
+
+        <!-- אזור תוכן הדשבורד -->
+        <div class="dashboard-content">
+            
+            <!-- כרטיסיות מדדים מובילות (KPI Cards) - 2 כרטיסיות בלבד בפריסה נקייה -->
+            <div class="cards-grid">
+                
+                <!-- כרטיסייה 1: שליפת כמות המשתמשים מ-PostgreSQL באמצעות Razor (@Model.TotalUsers) -->
+                <div class="card">
+                    <div class="card-title">משתמשים רשומים במערכת</div>
+                    <div class="card-value">@Model.TotalUsers <span>משתמשים</span></div>
+                </div>
+
+                <!-- כרטיסייה 2: אינדיקטור חיבור בסיס נתונים -->
+                <div class="card">
+                    <div class="card-title">סטטוס PostgreSQL</div>
+                    <div class="card-value" style="color: #28a745; font-size: 22px;">מחובר ופעיל</div>
+                </div>
+
+            </div>
+
+            <!-- פאנל טבלת משתמשים ברוחב מלא (100%) -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fa-solid fa-users-gear"></i> משתמשים אחרונים שנרשמו
+                    </div>
+                </div>
+
+                <!-- טבלת נתוני המשתמשים האמיתיים מ-PostgreSQL -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>שם מלא</th>
+                            <th>שם משתמש</th>
+                            <th>אימייל</th>
+                            <th>סטטוס ופעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* בדיקה: אם קיימים משתמשים שנשלפו מ-PostgreSQL, נציג אותם בלולאה *@
+                        @if (Model.RecentUsers != null && Model.RecentUsers.Count > 0)
+                        {
+                            @* לולאת Razor השרתית: עוברת על כל משתמש אמיתי מ-PostgreSQL ומציגה אותו בטבלה *@
+                            @foreach (var user in Model.RecentUsers)
+                            {
+                                <tr>
+                                    @* הצגת מזהה המשתמש הבלעדי מתוך ה-DB *@
+                                    <td><strong>#@user.Id</strong></td>
+                                    @* הצגת השם המלא של המשתמש *@
+                                    <td>@user.FullName</td>
+                                    @* הצגת שם המשתמש למערכת *@
+                                    <td>@user.Username</td>
+                                    @* הצגת כתובת הדוא"ל *@
+                                    <td>@user.Email</td>
+                                    @* תא המכיל גם תגית סטטוס וגם כפתור מחיקה *@
+                                    <td>
+                                        <div class="action-cell">
+                                            @* תגית סטטוס פעיל *@
+                                            <span class="badge-active">פעיל</span>
+                                            
+                                            @* טופס שליחת בקשת POST לשרת למחיקת המשתמש הספציפי לפי ה-ID שלו *@
+                                            <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" onsubmit="return confirm('האם אתה בטוח שברצונך למחוק משתמש זה מ-PostgreSQL?');">
+                                                @* כפתור מחיקה מעוצב הכולל אייקון פח אשפה *@
+                                                <button type="submit" class="btn-delete">
+                                                    <i class="fa-regular fa-trash-can"></i> מחיקה
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            @* הודעה במידה ובסיס הנתונים עדיין ריק או לא החזיר שורות *@
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px; color: #888;">
+                                    לא נמצאו משתמשים בבסיס הנתונים
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
